@@ -1,0 +1,211 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: smartroom_db
+    environment:
+      POSTGRES_USER: smartroom_user
+      POSTGRES_PASSWORD: smartroom_password
+      POSTGRES_DB: smartroom_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartroom_user -d smartroom_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartroom_network
+
+  # Redis Cache (Part II Enhancement)
+  redis:
+    image: redis:7-alpine
+    container_name: smartroom_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - smartroom_network
+
+  # API Gateway (Part II Enhancement)
+  api_gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api_gateway
+    command: uvicorn services.api_gateway:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      DATABASE_URL: postgresql://smartroom_user:smartroom_password@db:5432/smartroom_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: your-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - users_service
+      - rooms_service
+      - bookings_service
+      - reviews_service
+    volumes:
+      - .:/app
+    networks:
+      - smartroom_network
+
+  # Users Service
+  users_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: users_service
+    command: uvicorn services.users_service:app --host 0.0.0.0 --port 8001 --reload
+    environment:
+      DATABASE_URL: postgresql://smartroom_user:smartroom_password@db:5432/smartroom_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: your-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8001:8001"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - smartroom_network
+
+  # Rooms Service
+  rooms_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rooms_service
+    command: uvicorn services.rooms_service:app --host 0.0.0.0 --port 8002 --reload
+    environment:
+      DATABASE_URL: postgresql://smartroom_user:smartroom_password@db:5432/smartroom_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: your-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8002:8002"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - smartroom_network
+
+  # Bookings Service
+  bookings_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bookings_service
+    command: uvicorn services.bookings_service:app --host 0.0.0.0 --port 8003 --reload
+    environment:
+      DATABASE_URL: postgresql://smartroom_user:smartroom_password@db:5432/smartroom_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: your-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8003:8003"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - smartroom_network
+
+  # Reviews Service
+  reviews_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reviews_service
+    command: uvicorn services.reviews_service:app --host 0.0.0.0 --port 8004 --reload
+    environment:
+      DATABASE_URL: postgresql://smartroom_user:smartroom_password@db:5432/smartroom_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: your-secret-key-change-in-production
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "8004:8004"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    networks:
+      - smartroom_network
+
+  # Prometheus Monitoring (Part II Enhancement)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: smartroom_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - smartroom_network
+
+  # Grafana Dashboard (Part II Enhancement)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: smartroom_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - smartroom_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  smartroom_network:
+    driver: bridge

@@ -1,0 +1,651 @@
+{
+  "info": {
+    "name": "Smart Meeting Room Management System",
+    "description": "Complete API collection for all microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url_users",
+      "value": "http://localhost:8001"
+    },
+    {
+      "key": "base_url_rooms",
+      "value": "http://localhost:8002"
+    },
+    {
+      "key": "base_url_bookings",
+      "value": "http://localhost:8003"
+    },
+    {
+      "key": "base_url_reviews",
+      "value": "http://localhost:8004"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Users Service",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"testpassword123\",\n  \"full_name\": \"Test User\",\n  \"role\": \"REGULAR_USER\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_users}}/register",
+              "host": ["{{base_url_users}}"],
+              "path": ["register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"testpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_users}}/login",
+              "host": ["{{base_url_users}}"],
+              "path": ["login"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_users}}/users",
+              "host": ["{{base_url_users}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User by Username",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_users}}/users/testuser",
+              "host": ["{{base_url_users}}"],
+              "path": ["users", "testuser"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_users}}/users/testuser",
+              "host": ["{{base_url_users}}"],
+              "path": ["users", "testuser"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_users}}/users/testuser/bookings",
+              "host": ["{{base_url_users}}"],
+              "path": ["users", "testuser", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_users}}/users/testuser",
+              "host": ["{{base_url_users}}"],
+              "path": ["users", "testuser"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_users}}/health",
+              "host": ["{{base_url_users}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rooms Service",
+      "item": [
+        {
+          "name": "Create Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Conference Room A\",\n  \"location\": \"Building 1, Floor 2\",\n  \"capacity\": 20,\n  \"equipment\": [\"Projector\", \"Whiteboard\", \"Video Conference\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms"]
+            }
+          }
+        },
+        {
+          "name": "Get All Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms"]
+            }
+          }
+        },
+        {
+          "name": "Get Rooms with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms?min_capacity=10&available_only=true",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms"],
+              "query": [
+                {
+                  "key": "min_capacity",
+                  "value": "10"
+                },
+                {
+                  "key": "available_only",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Room by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms/1",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Room",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Conference Room A\",\n  \"capacity\": 25\n}"
+            },
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms/1",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Room Status",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms/1/status",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms", "1", "status"]
+            }
+          }
+        },
+        {
+          "name": "Search Available Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms/available/search?start_time=2024-12-01T10:00:00&end_time=2024-12-01T12:00:00&min_capacity=10",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms", "available", "search"],
+              "query": [
+                {
+                  "key": "start_time",
+                  "value": "2024-12-01T10:00:00"
+                },
+                {
+                  "key": "end_time",
+                  "value": "2024-12-01T12:00:00"
+                },
+                {
+                  "key": "min_capacity",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Room",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/rooms/1",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["rooms", "1"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_rooms}}/health",
+              "host": ["{{base_url_rooms}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bookings Service",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": 1,\n  \"start_time\": \"2024-12-01T10:00:00\",\n  \"end_time\": \"2024-12-01T12:00:00\",\n  \"purpose\": \"Team Sprint Planning\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings/1",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purpose\": \"Updated Meeting Purpose\",\n  \"end_time\": \"2024-12-01T13:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings/1",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings/1",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Check Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": 1,\n  \"start_time\": \"2024-12-01T14:00:00\",\n  \"end_time\": \"2024-12-01T16:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings/check-availability",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings", "check-availability"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_bookings}}/bookings/user/1",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["bookings", "user", "1"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_bookings}}/health",
+              "host": ["{{base_url_bookings}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews Service",
+      "item": [
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"room_id\": 1,\n  \"rating\": 4.5,\n  \"comment\": \"Excellent room with great facilities!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get All Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Flagged Reviews (Moderator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews?flagged_only=true",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews"],
+              "query": [
+                {
+                  "key": "flagged_only",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Review by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Room Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/room/1",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "room", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5.0,\n  \"comment\": \"Updated review - Even better than before!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Flag Review",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Inappropriate content or offensive language\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1/flag",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1", "flag"]
+            }
+          }
+        },
+        {
+          "name": "Moderate Review - Approve",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_moderated\": true,\n  \"action\": \"approve\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1/moderate",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1", "moderate"]
+            }
+          }
+        },
+        {
+          "name": "Moderate Review - Remove",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_moderated\": true,\n  \"action\": \"remove\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1/moderate",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1", "moderate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/reviews/1",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["reviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url_reviews}}/health",
+              "host": ["{{base_url_reviews}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

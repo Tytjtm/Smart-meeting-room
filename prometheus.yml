@@ -1,0 +1,44 @@
+# Prometheus configuration for monitoring all services
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'smartroom'
+    environment: 'development'
+
+scrape_configs:
+  # API Gateway metrics
+  - job_name: 'api_gateway'
+    static_configs:
+      - targets: ['api_gateway:8000']
+    metrics_path: '/metrics'
+
+  # Users Service metrics
+  - job_name: 'users_service'
+    static_configs:
+      - targets: ['users_service:8001']
+    metrics_path: '/metrics'
+
+  # Rooms Service metrics
+  - job_name: 'rooms_service'
+    static_configs:
+      - targets: ['rooms_service:8002']
+    metrics_path: '/metrics'
+
+  # Bookings Service metrics
+  - job_name: 'bookings_service'
+    static_configs:
+      - targets: ['bookings_service:8003']
+    metrics_path: '/metrics'
+
+  # Reviews Service metrics
+  - job_name: 'reviews_service'
+    static_configs:
+      - targets: ['reviews_service:8004']
+    metrics_path: '/metrics'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
